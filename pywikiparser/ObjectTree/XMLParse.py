@@ -19,10 +19,10 @@ class XMLParser(xml.sax.handler.ContentHandler):
     def __init__(self):
         self.root = Element('root')
         self.currentNode = self.root
-        
+
     def startElement(self, name, attrs):
         self.currentNode = self.currentNode.appendElement(name, dict(attrs.items()))
-            
+
     def endElement(self, name):
         if self.currentNode.name == name:
             self.currentNode = self.currentNode.parent
@@ -41,7 +41,7 @@ def parseText(data):
     <'root' element: {} [u'Hello, ', <'bold' element: {} [u'this']>, u' is a test! ', <'link' element: {u'rel': u'blah'} []>]>
     >>> tree.toxml()
     u'<root>Hello, <bold>this</bold> is a test! <link rel="blah"/></root>'
-    
+
     >>> parseText("<root><nonclosed></root>")
     Traceback (most recent call last):
       ...
