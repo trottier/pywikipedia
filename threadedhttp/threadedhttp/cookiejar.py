@@ -19,7 +19,7 @@ class LockableCookieJar(cookielib.CookieJar):
     def __init__(self, *args, **kwargs):
         cookielib.CookieJar.__init__(self, *args, **kwargs)
         self.lock = threading.Lock()
-        
+
 class LockableFileCookieJar(cookielib.FileCookieJar):
     """ CookieJar with integrated Lock object """
     def __init__(self, *args, **kwargs):

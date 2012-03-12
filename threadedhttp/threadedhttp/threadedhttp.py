@@ -21,7 +21,7 @@ class HttpRequest(object):
         >>> queue.put(request)
         >>> request.lock.acquire()
         >>> print request.data
-        
+
         C{request.lock.acquire()} will block until the data is available.
     """
     def __init__(self, *args, **kwargs):
@@ -40,7 +40,7 @@ class HttpProcessor(threading.Thread):
         threading.Thread.__init__(self)
         self.queue = queue
         self.http = Http(cookiejar=cookiejar, connection_pool=connection_pool)
-        
+
     def run(self):
         # The Queue item is expected to either an HttpRequest object
         # or None (to shut down the thread)

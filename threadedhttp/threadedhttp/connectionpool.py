@@ -31,7 +31,7 @@ class ConnectionPool(object):
         self.connections = [None] * max_connections # fill known connections witn Nones
         self.clists = {}         # 'id': (semaphore, lock, [connection1, connection2])
         logging.log(1,'<%r>: initialized' % self)
-        
+
     def __del__(self):
         """ Destructor to close all connections in the pool.
             Not completely thread-safe, as connections *could* return just
@@ -46,7 +46,7 @@ class ConnectionPool(object):
             del self.clists
         finally:
             self.lock.release()
-        
+
     def pop_connection(self, identifier):
         """ Gets a connection from identifiers connection pool
             @param identifier The pool identifier
@@ -93,13 +93,13 @@ class ConnectionPool(object):
                     self.lock.release()
             except Exception, e:
                 logging.log(20,'<%r>: Exception raised level 2 | %r' % (self, e))
-                clist.max.release()            
+                clist.max.release()
                 raise
         except Exception, e:
             logging.log(20,'<%r>: Exception raised level 1 | %r' % (self, e))
             self.global_max.release()
             raise
-        
+
     def push_connection(self, identifier, connection):
         """ Gets a connection from identifiers connection pool
             @param identifier The pool identifier
@@ -126,20 +126,20 @@ class BasicConnectionPool(object):
         self.connections = {}
         self.lock = threading.Lock()
         self.maxnum = maxnum
-    
+
     def __del__(self):
         """ Destructor to close all connections in the pool """
         self.lock.acquire()
         try:
             for connection in self.connections:
                 connection.close()
-            
+
         finally:
             self.lock.release()
-            
+
     def __repr__(self):
         return self.connections.__repr__()
-        
+
     def pop_connection(self, identifier):
         """ Gets a connection from identifiers connection pool
             @param identifier: The pool identifier
@@ -153,7 +153,7 @@ class BasicConnectionPool(object):
             return None
         finally:
             self.lock.release()
-            
+
     def push_connection(self, identifier, connection):
         """ Adds a connection to identifiers connection pool
             @param identifier: The pool identifier
@@ -163,7 +163,7 @@ class BasicConnectionPool(object):
         try:
             if identifier not in self.connections:
                 self.connections[identifier] = []
-            
+
             if len(self.connections[identifier]) == self.maxnum:
                 logging.debug('closing %s connection %r' % (identifier, connection))
                 connection.close()
