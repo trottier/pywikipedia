@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8  -*-
+# -*- coding: utf-8  -*-
 """ Mediawiki wikitext lexer """
 #
 # (C) 2007 Merlijn 'valhallasw' van Deen
@@ -13,11 +13,11 @@ class Token:
     def __init__(self, name, description):
         self.name = name
         self.__doc__ = description
-        
+
     def __repr__(self):
         return '<T_%s>' % (self.name,)
 
-class Tokens: 
+class Tokens:
     tokens = [
                ('TEXT',        '      Text data'),
                ('SQRE_OPEN',   '[     Square bracket open'),
@@ -46,7 +46,7 @@ class Tokens:
 class Lexer:
     """ Lexer class for mediawiki wikitext. Used by the Parser module
     Lexer.lexer() returns a generator that returns (Token, text) pairs. The text represents the actual text data, the token the interpreted data.
-    
+
     >>> l = Lexer('Test with [[wikilink|description]], {{template|parameter\\'s|{{nested}}=booh}}, \\n\\n new paragraphs, <html>, {| tables |- |}')
     >>> gen = l.lexer()
     >>> gen.next()
@@ -56,10 +56,10 @@ class Lexer:
     >>> [token for token in gen][:10]
     [(<T_TEXT>, 'with'), (<T_WHITESPACE>, ' '), (<T_SQRE_OPEN>, '['), (<T_SQRE_OPEN>, '['), (<T_TEXT>, 'wikilink'), (<T_PIPE>, None), (<T_TEXT>, 'description'), (<T_SQRE_CLOSE>, ']'), (<T_SQRE_CLOSE>, ']'), (<T_TEXT>, ',')]
     """
-    
+
     def __init__(self, string):
         self.data = (a for a in string)
-    
+
     def lexer(self):
         text = ''
         try:
@@ -69,7 +69,7 @@ class Lexer:
                     if text:
                         yield (Tokens.TEXT, text)
                         text = ''
-                    
+
                     if   (c == '['): yield (Tokens.SQRE_OPEN,  c)
                     elif (c == ']'): yield (Tokens.SQRE_CLOSE, c)
                     elif (c == '}'): yield (Tokens.CURL_CLOSE, c)
@@ -92,14 +92,14 @@ class Lexer:
                         c = self.getchar()
                     else:
                         yield (Tokens.CURL_OPEN, '{')
-                    
+
                     c = t
                 elif (c == '|'):
                     if text:
                         yield (Tokens.TEXT, text)
                         text = ''
                     t = self.getchar()
-                    
+
                     if (t == '-'):
                         yield (Tokens.TAB_NEWLINE, '|-')
                         c = self.getchar()
@@ -131,9 +131,9 @@ class Lexer:
             yield (Tokens.TEXT, text)
         yield (Tokens.EOF, None)
 
-    def getchar(self): 
+    def getchar(self):
         return self.data.next()
-        
+
 if __name__ == "__main__":
     import doctest
     doctest.testmod()

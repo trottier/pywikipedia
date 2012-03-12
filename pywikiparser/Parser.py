@@ -30,11 +30,11 @@ class Parser:
         _debug = debug
 
         self.lex = BufferedReader(Lexer(data).lexer())
-        
+
     def expect(self, tokens):
         if not isinstance(tokens, list):
             tokens = [tokens,]
-           
+
         data = self.lex.peek()
         if data[0] in tokens:
             return self.lex.next()[1]
@@ -48,15 +48,15 @@ class Parser:
                 data += self.expect(tokens)
         except ParseError:
             return data
-                
+
     def parse(self, breaktoken=[]):
         self.root = dom.Element('wikipage')
         self.par = self.root.appendElement('p')
         self.italic = False
         self.bold = False
-        
+
         restore = self.lex.getrestore()
-        
+
         try:
             while(True):
                 token = self.lex.peek()
@@ -67,7 +67,7 @@ class Parser:
                 dbgmsg("Adding %r (was %r)" % (node,token))
                 self.par.extend(node)
                 restore = self.lex.commit(restore)
-                
+
         except StopIteration: pass
         return self.root
 
@@ -75,23 +75,23 @@ class Parser:
         # The function to call is parser<token>
         exec("data = self.parse%s(restore)" % token[0].name, globals(), locals())
         return data
-        
+
     def parseEOF(self, restore):
         token = self.expect(Tokens.EOF)
         raise StopIteration
-    
+
     # Special functions that directly access the storage tree
-        
+
     def parseNEWPAR(self, restore):
         token = self.expect(Tokens.NEWPAR)
         self.par = self.root.appendElement('p')
         self.bold = False
         self.italic = False
         return []
-                
+
     def parseAPOSTROPHE(self, restore):
         num = len(self.eat(Tokens.APOSTROPHE))
-        
+
         #prepare length
         if (num == 1):
             self.par.append('\'')
@@ -101,11 +101,11 @@ class Parser:
         elif (num > 5):
             self.par.append('\'' * (num-5))
             num = 5
-        
+
         # determine changes
         newitalic = self.italic
         newbold  = self.bold
-        
+
         if num == 2: #toggle italic
             newitalic = not self.italic
         elif num == 3: #toggle bold
@@ -113,7 +113,7 @@ class Parser:
         elif num == 5: #toggle both
             newitalic = not self.italic
             newbold = not self.bold
-        
+
         dbgmsg('bold: %r>%r italic: %r>%r' % (self.bold, newbold, self.italic, newitalic))
         if self.italic and not newitalic:
             if self.par.name == 'i' or not newbold:
@@ -131,21 +131,21 @@ class Parser:
             self.par = self.par.appendElement('i')
             self.italic = True
         if not self.bold and newbold:
-            self.par = self.par.appendElement('b')   
+            self.par = self.par.appendElement('b')
             self.bold = True
-        return []     
-    
+        return []
+
     # Functions that return the input directly
-    
+
     def parseSQRE_CLOSE(self, restore):
         return self.expect(Tokens.SQRE_CLOSE)
-        
+
     def parsePIPE(self, restore):
         return self.expect(Tokens.PIPE)
-        
+
     def parseEQUAL_SIGN(self, restore):
         return self.expect(Tokens.EQUAL_SIGN)
-        
+
     def parseCURL_CLOSE(self, restore):
         return self.expect(Tokens.CURL_CLOSE)
 
@@ -154,13 +154,13 @@ class Parser:
 
     def parseASTERISK(self, restore):
         return self.expect(Tokens.ASTERISK)
-        
+
     def parseCOLON(self, restore):
         return self.expect(Tokens.COLON)
-        
+
     def parseSEMICOLON(self, restore):
         return self.expect(Tokens.SEMICOLON)
-        
+
     def parseHASH(self, restore):
         return self.expect(Tokens.HASH)
 
@@ -169,11 +169,11 @@ class Parser:
 
     def parseTAB_CLOSE(self, restore):
         return self.expect(Tokens.TAB_CLOSE)
- 
+
     # True parser callers
 
     def parseWHITESPACE(self, restore):
-    	# Todo: 
+    	# Todo:
         return self.parseTEXT(restore)
 
     def parseTEXT(self, restore):
@@ -193,15 +193,15 @@ class Parser:
         try:
             return self.parseExternallink()
         except ParseError: pass
-        
+
         self.lex.undo(restore)
         return self.expect(Tokens.SQRE_OPEN)
-        
+
     def parseCURL_OPEN(self, restore):
         try:
             return self.parseTemplateparam()
         except ParseError: pass
-        
+
         self.lex.undo(restore)
         try:
             return self.parseTemplate()
@@ -209,12 +209,12 @@ class Parser:
 
         self.lex.undo(restore)
         return self.expect(Tokens.CURL_OPEN)
-                
+
     def parseANGL_OPEN(self, restore):
         try:
             return self.parseHTML()
         except ParseError: pass
-        
+
         self.lex.undo(restore)
         return self.expect(Tokens.ANGL_OPEN)
 
@@ -222,37 +222,37 @@ class Parser:
         try:
             return self.parseWikitable()
         except ParseError: pass
-        
+
         self.lex.undo(restore)
         return self.expect(Tokens.TAB_OPEN)
-    
+
     def parseWikilink(self):
     	retval = dom.Element('')
     	self.expect(Tokens.SQRE_OPEN)
     	self.expect(Tokens.SQRE_OPEN)
-    	
+
     	pre = self.eat(Tokens.SQRE_OPEN)
         if pre:
             retval.append(pre)
 
         wikilink = retval.appendElement('wikilink')
-        # get page title    	
+        # get page title
         title = wikilink.appendElement('title')
 
         #parse title
         title.extend(self.parseTitle(Tokens.SQRE_CLOSE))
-        
+
         self.expect(Tokens.SQRE_CLOSE)
         self.expect(Tokens.SQRE_CLOSE)
-        
+
         return retval
-        
-        
-                
+
+
+
 #    	while( titlere.match(next) ):
 #    	    title += next
 #    	    next = self.lex.peek()
-#        
+#
 #
 #    	    else:
 #    	        break
@@ -266,27 +266,27 @@ class Parser:
 #    	           continue
 #    	        else:
 #    	            break
-#    	    
-#    	           
-#    	             
+#
+#
+#
 #        	    breaktoken = self.lex.peek()
 #        	    if breaktoken[0] == Tokens.PIPE:
 #    	            break
 #    	        elif breaktoken[0] == Tokens.SQRE_CLOSE:
 #    	            next = self.lex.peek(2)
 #    	            if next[0] == Tokens.SQRE_CLOSE:
-#    	                
-#        self.expect(Tokens.SQRE_CLOSE)    	
+#
+#        self.expect(Tokens.SQRE_CLOSE)
 #        self.expect(Tokens.SQRE_CLOSE)
 #    	return retval
-#    		
-        
+#
+
     def parseExternallink(self):
         raise ParseError("Needs implementation")
-    
+
     def parseTemplateparam(self):
         raise ParseError("Needs implementation")
-        
+
     def parseTemplate(self):
         retval = dom.Element('')
         self.expect(Tokens.CURL_OPEN)
@@ -297,23 +297,23 @@ class Parser:
             retval.append(pre)
 
         wikilink = retval.appendElement('template')
-        # get page title    	
+        # get page title
         title = wikilink.appendElement('title')
         title.extend(self.parseTitle(Tokens.CURL_CLOSE))
- 
+
         self.expect(Tokens.CURL_CLOSE)
         self.expect(Tokens.CURL_CLOSE)
 
         return retval
-       
-        
+
+
     def parseHTML(self):
         raise ParseError("Needs implementation")
-        
+
     def parseWikitable(self):
         raise ParseError("Needs implementation")
-    
-    titlere = re.compile(r"[^\^\]<>\[\|\{\}\n]*$")   	
+
+    titlere = re.compile(r"[^\^\]<>\[\|\{\}\n]*$")
     def parseTitle(self, closetoken):
         title = dom.Element('title')
         while(True):
