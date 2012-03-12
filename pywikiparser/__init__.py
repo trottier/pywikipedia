@@ -5,6 +5,6 @@
 #
 # Distributed under the terms of the MIT license.
 #
-__version__ = u'$Id $'
+__version__ = '$Id$'
 
 from Parser import Parser
