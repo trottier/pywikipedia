@@ -18,7 +18,7 @@ setup(
     author_email = "valhallasw@arctus.nl",
     description = "httplib2-based HTTP library supporting cookies and threads",
     classifiers = filter(None, map(str.strip,
-"""                 
+"""
 Intended Audience :: Developers
 License :: OSI Approved :: MIT License
 Programming Language :: Python
